@@ -8,24 +8,66 @@
   <script>
   window.addEventListener("load",init);
   var trace1 = {
-      x: [1, 2, 3, 4],
-      y: [10, 15, 13, 17],
+      x: [],
+      y: [],
       type: 'scatter'
     };
-
-    var trace2 = {
-      x: [1, 2, 3, 4],
-      y: [16, 5, 11, 9],
-      type: 'scatter'
-    };
-
-  var data = [trace1, trace2];
+  //var data = [trace1, trace2];
 
   function init(){
-     Plotly.newPlot('myDiv', data);
+     let inputFile = document.getElementById("loadFile");
+     inputFile.addEventListener("change",fileChange);
   }
+  let reader;
+  function fileChange(event){
+    //ファイルを取得
+    let target = event.target;
+    let file = target.files[0];
+    //サイズを表示
+    console.log(file.size);
+    //ファイルの読み込み
+    reader = new FileReader();
+    reader.readAsText(file);
+    reader.addEventListener("load",fileLoad);
+  }
+
+  function fileLoad(){
+    let str = reader.result;
+    str= str.split("\n");
+    let data = new Array();
+    for(var j=0;j<str.length-1;j++){
+      data.push(str[j].split(" "));
+    }
+    for(var i=0;i<data.length;i++){
+      data[i][0]=Number(data[i][0]);
+      data[i][1]=Number(data[i][1]);
+    }
+
+    console.log(data);
+    leastSquares(data);
+    for(var k=0;k<data.length;k++){
+      trace1.x[k]=data[k][0];
+      trace1.y[k]=data[k][1];
+    }
+    let datas = [trace1];
+    Plotly.newPlot('myDiv', datas);
+  }
+/*
+  function leastSquares(ds){
+    let sum_xy=0,sum_x=0,sum_y=0,sum_x2=0;
+    for(var i=0;i<ds.length;i++){
+      sum_xy = ds[i][0]*ds[i][1];
+      sum_x = ds[i][0];
+      sum_y = ds[i][1];
+      sum_x2 = ds[i][0]*ds[i][0];
+    }
+    let a = ds.length*
+    let b =
+  }
+*/
   </script>
 <body>
+<input id="loadFile" type="file">
 <div id="myDiv"></div>
 </body>
 </html>
