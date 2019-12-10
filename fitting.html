@@ -7,6 +7,11 @@
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script>
   window.addEventListener("load",init);
+  var trace0 = {
+      x: [],
+      y: [],
+      type: 'scatter'
+    };
   var trace1 = {
       x: [],
       y: [],
@@ -42,32 +47,53 @@
       data[i][0]=Number(data[i][0]);
       data[i][1]=Number(data[i][1]);
     }
-
-    console.log(data);
-    leastSquares(data);
     for(var k=0;k<data.length;k++){
-      trace1.x[k]=data[k][0];
-      trace1.y[k]=data[k][1];
+      trace0.x[k]=data[k][0];
+      trace0.y[k]=data[k][1];
     }
-    let datas = [trace1];
+    leastSquares(data,0,3.3);
+    let datas = [trace0,trace1];
     Plotly.newPlot('myDiv', datas);
   }
-/*
-  function leastSquares(ds){
+
+  function leastSquares(ds,min,max){
     let sum_xy=0,sum_x=0,sum_y=0,sum_x2=0;
+    let N = 0;
     for(var i=0;i<ds.length;i++){
-      sum_xy = ds[i][0]*ds[i][1];
-      sum_x = ds[i][0];
-      sum_y = ds[i][1];
-      sum_x2 = ds[i][0]*ds[i][0];
+      if(min<ds[i][0]&&ds[i][0]<max){
+        N++;
+        sum_xy += ds[i][0]*ds[i][1];
+        sum_x += ds[i][0];
+        sum_y += ds[i][1];
+        sum_x2 += ds[i][0]*ds[i][0];
+      }
     }
-    let a = ds.length*
-    let b =
+    let avg_x = sum_x/N;
+    let avg_y = sum_y/N;
+    let R2=0,regression=0,total=0;
+    let a = (N*sum_xy-sum_x*sum_y)/(N*sum_x2-(sum_x**2));
+    let b = (sum_x2*sum_y-sum_xy*sum_x)/(N*sum_x2-(sum_x**2));
+    let shiki = document.getElementById("sushiki");
+    for(var i=0;i<max*100;i++){
+      xm = i/100;
+      if(min<xm&&xm<max){
+        trace1.x[i]= xm;
+        trace1.y[i]= a*xm+b;
+        if(i%10==0){
+          total += (ds[i/10][1]-avg_y)**2;
+          regression += (trace1.y[i]-avg_y)**2
+        }
+      }
+    }
+    R2 = regression/total;
+    shiki.innerHTML = "Y="+a+"X"+b+"<br>決定係数R^2: "+R2+"<br>相関係数R:"+Math.sqrt(R2);
+
   }
-*/
+
   </script>
 <body>
 <input id="loadFile" type="file">
 <div id="myDiv"></div>
+<div id="sushiki"></div>
 </body>
 </html>
